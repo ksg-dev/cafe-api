@@ -19,6 +19,7 @@ This will install the packages from requirements.txt for this project.
 
 app = Flask(__name__)
 
+
 # CREATE DB
 class Base(DeclarativeBase):
     pass
@@ -64,6 +65,24 @@ def get_random_cafe():
 def get_all():
     all_cafes = db.session.execute(db.select(Cafe).order_by(Cafe.name)).scalars().all()
     return jsonify(cafes=[cafe.to_dict() for cafe in all_cafes])
+
+
+@app.route("/search")
+def search():
+    location = request.args.get("loc")
+    found_cafes = db.session.execute(db.select(Cafe).where(Cafe.location == location)).scalars().all()
+
+    error_dict = {
+        "Not Found": "Sorry, we don't have a cafe in that location"
+    }
+
+    if found_cafes:
+        return jsonify(cafes=[cafe.to_dict() for cafe in found_cafes])
+    else:
+        return jsonify(error={"Not Found": "Sorry, we don't have a cafe in that location"}), 404
+
+
+
 
 # HTTP POST - Create Record
 
