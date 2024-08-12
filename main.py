@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
+import random
 
 '''
 Install the required packages first: 
@@ -41,6 +42,8 @@ class Cafe(db.Model):
     can_take_calls: Mapped[bool] = mapped_column(Boolean, nullable=False)
     coffee_price: Mapped[str] = mapped_column(String(250), nullable=True)
 
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 with app.app_context():
     db.create_all()
@@ -52,6 +55,11 @@ def home():
 
 
 # HTTP GET - Read Record
+@app.route("/random")
+def get_random_cafe():
+    random_cafe = random.choice(Cafe.query.all())
+    return jsonify(cafe=random_cafe.to_dict())
+
 
 # HTTP POST - Create Record
 
